@@ -311,6 +311,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         let fromLabel = UILabel(frame: CGRectMake(0, 0, view.frame.width, 30))
         fromLabel.text = "@" + from + ":"
         fromLabel.textAlignment = NSTextAlignment.Left
+        fromLabel.textColor = UIColor.blueColor()
         view.addSubview(fromLabel)
         return view
     }
@@ -328,85 +329,58 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         let fromLabel = UILabel(frame: CGRectMake(0, 0, view.frame.width, 30))
         fromLabel.text = "@Me:"
         fromLabel.textAlignment = NSTextAlignment.Right
-        fromLabel.textColor = UIColor.blueColor()
         fromLabel.font = UIFont(name: "Helvetica Neue", size: 14)
         view.addSubview(fromLabel)
         return view
     }
     
     func getViewForPersonalMessage(message:String) -> UIView {
-        
-        
         let label = UILabel(frame: CGRectMake(0, 0, 100, 21))
         label.text = "@Me:"
+        label.textAlignment = NSTextAlignment.Right
+        label.font = UIFont(name: "Helvetica Neue", size: 15)
         label.sizeToFit()
         
         let text = UITextView(frame: CGRectMake(0, 21, self.view.frame.width * 0.5, 100))
         text.text = message
+        text.textAlignment = NSTextAlignment.Right
+        text.font = UIFont(name: "Helvetica Neue", size: 15)
         text.sizeToFit()
         text.backgroundColor = UIColor.groupTableViewBackgroundColor()
+        text.layer.cornerRadius = 6
+        
+        let parentView = UIView(frame: CGRectMake(8, 0, max(label.frame.width, text.frame.width), label.frame.height + text.frame.height))
+        parentView.frame.origin.y = self.totalHeight
+        parentView.frame.origin.x = self.view.frame.width - 8 - parentView.frame.width
+        label.frame.origin.x = parentView.frame.width - label.frame.width
+        text.frame.origin.x = parentView.frame.width - text.frame.width
+        parentView.addSubview(label)
+        parentView.addSubview(text)
+        return parentView
+    }
+    
+    func getViewForMessage(message:String, from:String) -> UIView {
+        let label = UILabel(frame: CGRectMake(0, 0, 100, 21))
+        label.text = "@" + from
+        label.textAlignment = NSTextAlignment.Right
+        label.font = UIFont(name: "Helvetica Neue", size: 15)
+        label.textColor = UIColor.blueColor()
+        label.sizeToFit()
+        
+        let text = UITextView(frame: CGRectMake(0, 21, self.view.frame.width * 0.5, 100))
+        text.text = message
+        text.textAlignment = NSTextAlignment.Right
+        text.font = UIFont(name: "Helvetica Neue", size: 15)
+        text.sizeToFit()
+        text.backgroundColor = UIColor.blueColor()
+        text.textColor = UIColor.whiteColor()
+        text.layer.cornerRadius = 6
         
         let parentView = UIView(frame: CGRectMake(8, 0, max(label.frame.width, text.frame.width), label.frame.height + text.frame.height))
         parentView.frame.origin.y = self.totalHeight
         parentView.addSubview(label)
         parentView.addSubview(text)
         return parentView
-        
-        
-        
-        
-        
-        let textView = UITextView(frame: CGRectMake(0, 21, self.view.frame.size.width * 0.8, 30))
-        textView.text = message
-        //resizeTextView(textView)
-        
-        textView.userInteractionEnabled = false
-        textView.editable = false
-        textView.textAlignment = NSTextAlignment.Right
-        textView.font = UIFont(name: "Helvetica Neue", size: 17)
-        textView.backgroundColor = UIColor.groupTableViewBackgroundColor()
-        textView.layer.cornerRadius = 6
-        textView.textColor = UIColor.blueColor()
-        
-        
-        let view = UIView(frame: CGRectMake(self.view.frame.width * 0.2 - 8, 0, self.view.frame.size.width * 0.8, textView.frame.size.height + 30))
-        textView.sizeToFit()
-        
-        view.addSubview(textView)
-        //textView.frame.origin = CGPointMake(self.view.frame.width - 8 - textView.frame.width, textView.frame.origin.y)
-        
-        
-        let fromLabel = UILabel(frame: CGRectMake(0, 0, view.frame.width, 21))
-        fromLabel.sizeToFit()
-        fromLabel.text = "@Me:"
-        fromLabel.textAlignment = NSTextAlignment.Right
-        fromLabel.textColor = UIColor.blueColor()
-        fromLabel.font = UIFont(name: "Helvetica Neue", size: 14)
-        view.frame = CGRectMake(self.view.frame.width - 8 - textView.frame.width, view.frame.origin.y, textView.frame.width, view.frame.height)
-        view.addSubview(fromLabel)
-        
-        //view.backgroundColor = UIColor.lightGrayColor().colorWithAlphaComponent(0.2)
-        //view.layer.cornerRadius = 6
-        
-        return view
-    }
-    
-    func getViewForMessage(message:String, from:String) -> UIView {
-        let textView = UITextView(frame: CGRectMake(0, 30, self.view.frame.size.width * 0.8, 30))
-        textView.text = message
-        resizeTextView(textView)
-        textView.userInteractionEnabled = false
-        textView.editable = false
-        textView.font = UIFont(name: "Helvetica Neue", size: 19)
-        
-        let view = UIView(frame: CGRectMake(8, 0, self.view.frame.size.width * 0.8, textView.frame.size.height + 30))
-        view.addSubview(textView)
-        
-        let fromLabel = UILabel(frame: CGRectMake(0, 0, view.frame.width, 30))
-        fromLabel.text = "@" + from + ":"
-        view.addSubview(fromLabel)
-        
-        return view
     }
     
     func resizeTextView(textView:UITextView) {
