@@ -63,18 +63,26 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         askAlert.addTextFieldWithConfigurationHandler { (textField) -> Void in
             inputTextField = textField
         }
+        let defaults = NSUserDefaults.standardUserDefaults()
+        if let name = defaults.stringForKey("username") {
+            self.username = name
+            self.manager = SessionManager(controller: self, id: self.username!)
+            self.nameBarButton.title = "@" + self.username!
+        } else {
         
         let okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) { (action) -> Void in
             if inputTextField?.text != "" {
                 self.username = inputTextField?.text
                 self.manager = SessionManager(controller: self, id: self.username!)
                 self.nameBarButton.title = "@" + self.username!
+                
+                defaults.setObject(self.username!, forKey: "username")
             } else {
                 self.presentViewController(askAlert, animated: true, completion: nil)
             }
         }
         askAlert.addAction(okAction)
-        self.presentViewController(askAlert, animated: true, completion: nil)
+            self.presentViewController(askAlert, animated: true, completion: nil) }
     }
     
     @IBAction func inputFieldChanged(sender: UITextField) {
@@ -86,36 +94,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         }
     }
     
-    func connectionLevelTapped() {
-        connectionsLevelView.hidden = !connectionsLevelView.hidden
-        if connectionLevelLabel.hidden {
-            connectionLevelLabel.hidden = false
-            for v in connectionsLevelArray {
-                v.backgroundColor = UIColor.blueColor().colorWithAlphaComponent(0.001)
-            }
-        } else {
-            connectionLevelLabel.hidden = true
-            updateCount(4)
-        }
-    }
-    
     func updateCount(num:Int) {
+        
+        
         for (var i = 0; i < 7; i++) {
-            if self.manager.session.connectedPeers.count > i {
-                self.connectionsLevelArray[i].backgroundColor = UIColor.blueColor()
+            if manager.sessions.count > i {
+                let n = Double(manager.sessions[i].connectedPeers.count/7)
+                self.connectionsLevelArray[i].backgroundColor = UIColor.blueColor().colorWithAlphaComponent(CGFloat(n))
             }
         }
-        /*
-        for session in self.manager.sessions {
-        if session.connectedPeers.count == 8 {
-        self.connectionsLevelArray[c].backgroundColor = UIColor.blueColor()
-        } else if session.connectedPeers.count > 0 {
-        self.connectionsLevelArray[c].backgroundColor = UIColor.blueColor().colorWithAlphaComponent(CGFloat(session.connectedPeers.count/8))
-        } else {
-        self.connectionsLevelArray[c].backgroundColor = UIColor.blueColor().colorWithAlphaComponent(0.1)
-        }
-        c++
-        }*/
     }
     
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
@@ -144,22 +131,13 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
     
     func imageResize(imageObj:UIImage, sizeChange:CGSize)-> UIImage {
-        
         let hasAlpha = false
         let scale: CGFloat = 0.0
-        
         UIGraphicsBeginImageContextWithOptions(sizeChange, !hasAlpha, scale)
         imageObj.drawInRect(CGRect(origin: CGPointZero, size: sizeChange))
-        
         let scaledImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return scaledImage
-    }
-    
-    @IBAction func pictureButtonTapped(sender: UIButton) {
-        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.PhotoLibrary){
-            self.presentViewController(imagePicker, animated: true, completion: nil)
-        }
     }
     
     @IBAction func pictureTapped(sender: UIBarButtonItem) {
@@ -216,18 +194,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         }
     }
     
-    func keyboardWillShow(sender: NSNotification) {
-        if let userInfo = sender.userInfo {
-            if let keyboardHeight = userInfo[UIKeyboardFrameEndUserInfoKey]?.CGRectValue.size.height {
-                inputViewBottomConstraint.constant = keyboardHeight
-                scrollViewBottomConstraint.constant = keyboardHeight + 50
-                UIView.animateWithDuration(0.15, animations: { () -> Void in
-                    self.view.layoutIfNeeded()
-                })
-            }
-        }
-    }
-    
     @IBAction func nameButtonTapped(sender: UIBarButtonItem) {
         let warningAlert = UIAlertController(title: "Warning", message: "Changing your username will reset your current connections. Are you sure you want to change your username?", preferredStyle: UIAlertControllerStyle.ActionSheet)
         let changeAction = UIAlertAction(title: "Change", style: UIAlertActionStyle.Destructive) { (action) -> Void in
@@ -260,6 +226,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
                 self.messageViewArray.removeAll()
                 self.messageObjectArray.removeAll()
                 self.nameBarButton.title = "@" + self.username!
+                let defaults = NSUserDefaults.standardUserDefaults()
+                defaults.setObject(self.username!, forKey: "username")
             } else {
                 self.presentViewController(askAlert, animated: true, completion: nil)
             }
@@ -268,16 +236,24 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         self.presentViewController(askAlert, animated: true, completion: nil)
     }
     
+    func keyboardWillShow(sender: NSNotification) {
+        if let userInfo = sender.userInfo {
+            if let keyboardHeight = userInfo[UIKeyboardFrameEndUserInfoKey]?.CGRectValue.size.height {
+                inputViewBottomConstraint.constant = keyboardHeight
+                scrollViewBottomConstraint.constant = keyboardHeight + 50
+                UIView.animateWithDuration(0.15, animations: { () -> Void in
+                    self.view.layoutIfNeeded()
+                })
+            }
+        }
+    }
+    
     func keyboardWillHide(sender: NSNotification) {
         inputViewBottomConstraint.constant = 0
         scrollViewBottomConstraint.constant = 50
         UIView.animateWithDuration(0.15, animations: { () -> Void in
             self.view.layoutIfNeeded()
         })
-    }
-    
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        self.view.endEditing(true)
     }
     
     func scrollViewTapped() {
@@ -299,9 +275,13 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
     
     func getViewForImage(image:UIImage, from:String) -> UIView {
-        let resizedImage = imageResize(image, sizeChange: CGSize(width: self.view.frame.width * 0.5, height: self.view.frame.width * 0.5 * 1.61803398875))
+        let desiredImageWidth = self.view.frame.width * 0.5
+        
+        let newHeight = (image.size.height * desiredImageWidth) / image.size.width
+        let resizedImage = imageResize(image, sizeChange: CGSize(width: desiredImageWidth, height: newHeight))
         
         let imageView = UIImageView(image: resizedImage)
+        
         imageView.layer.cornerRadius = 6
         imageView.clipsToBounds = true
         let view = UIView(frame: CGRectMake(8, 0, self.view.frame.size.width * 0.8, imageView.frame.size.height + 30))
@@ -317,7 +297,9 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
     
     func getViewForPersonalImage(image:UIImage) -> UIView {
-        let resizedImage = imageResize(image, sizeChange: CGSize(width: self.view.frame.width * 0.5, height: self.view.frame.width * 0.5 * 1.61803398875))
+        let desiredImageWidth = self.view.frame.width * 0.5
+        let newHeight = (image.size.height * desiredImageWidth) / image.size.width
+        let resizedImage = imageResize(image, sizeChange: CGSize(width: desiredImageWidth, height: newHeight))
         
         let imageView = UIImageView(image: resizedImage)
         imageView.layer.cornerRadius = 6
@@ -395,6 +377,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
+        self.manager.close()
     }
     
 }

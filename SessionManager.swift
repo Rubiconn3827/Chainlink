@@ -18,11 +18,12 @@ class SessionManager: NSObject, MCNearbyServiceBrowserDelegate, MCNearbyServiceA
     var peerID: MCPeerID
     var session: MCSession
     var numberOfConnections = 0
+    var sessions = [MCSession]()
     
     init(controller:ViewController, id:String) {
         peerID = MCPeerID(displayName: id)
         session = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: MCEncryptionPreference.Required)
-        
+        sessions.append(session)
         super.init()
         
         self.controller = controller
@@ -34,31 +35,49 @@ class SessionManager: NSObject, MCNearbyServiceBrowserDelegate, MCNearbyServiceA
         self.browser = MCNearbyServiceBrowser(peer: peerID, serviceType: serviceType)
         self.browser.delegate = self
         browser.startBrowsingForPeers()
-        controller.displaySystemMessage("Welcome to Chainlink")
     }
     
     func close() {
+        for session in sessions {
+            session.disconnect()
+        }
+        sessions.removeAll()
         browser.stopBrowsingForPeers()
         advertiser.stopAdvertisingPeer()
     }
     
     @objc func browser(browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
-        browser.invitePeer(peerID, toSession: session, withContext: nil, timeout: 10)
+        if sessions.last!.connectedPeers.count > 7 {
+            let newSession = MCSession(peer: peerID)
+            self.sessions.append(newSession)
+            newSession.delegate = self
+            browser.invitePeer(peerID, toSession: newSession, withContext: nil, timeout: 10)
+        } else {
+            browser.invitePeer(peerID, toSession: sessions.last!, withContext: nil, timeout: 10)
+        }
     }
     
-    @objc func browser(browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-    }
+    @objc func browser(browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) { }
     
     @objc func advertiser(advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: NSData?, invitationHandler: (Bool, MCSession) -> Void) {
-        invitationHandler(true, session)
+        if sessions.last!.connectedPeers.count > 7 {
+            let newSession = MCSession(peer: peerID)
+            self.sessions.append(newSession)
+            newSession.delegate = self
+            invitationHandler(true, newSession)
+        } else {
+            invitationHandler(true, sessions.last!)
+        }
     }
     
     func sendData(data:NSData, type:String) {
-        guard type == "m" else { return }
-
-        do {
-            try session.sendData(data, toPeers: session.connectedPeers, withMode: MCSessionSendDataMode.Reliable)
-        } catch { }
+        for session in sessions {
+            guard type == "m" else { return }
+            
+            do {
+                try session.sendData(data, toPeers: session.connectedPeers, withMode: MCSessionSendDataMode.Reliable)
+            } catch { }
+        }
     }
     
     func updateConnectionsCount() {
@@ -68,7 +87,7 @@ class SessionManager: NSObject, MCNearbyServiceBrowserDelegate, MCNearbyServiceA
         self.controller.updateCount(c)
     }
     
-   @objc  
+   @objc
     func session(session: MCSession, didReceiveData data: NSData, fromPeer peerID: MCPeerID) {
         let message = NSKeyedUnarchiver.unarchiveObjectWithData(data) as? MessageObject
         dispatch_async(dispatch_get_main_queue()) {
@@ -81,12 +100,14 @@ class SessionManager: NSObject, MCNearbyServiceBrowserDelegate, MCNearbyServiceA
         case MCSessionState.Connected:
             dispatch_async(dispatch_get_main_queue()) {
                 self.controller.displaySystemMessage("@\(peerID.displayName) connected!")
+                self.updateConnectionsCount()
             }
         case MCSessionState.Connecting:
             self.controller.updateCount(0)
         case MCSessionState.NotConnected:
             dispatch_async(dispatch_get_main_queue()) {
                 self.controller.displaySystemMessage("@\(peerID.displayName) disconnected.")
+                self.updateConnectionsCount()
             }
         }
     }

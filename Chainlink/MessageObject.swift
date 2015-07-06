@@ -41,15 +41,4 @@ class MessageObject: NSObject, NSCoding {
         self.image = withImageData
         self.id = Int(arc4random())
     }
-    
-    func toData() -> NSData {
-        if self.message == nil {
-            let dictionary:NSDictionary = ["from":from,"image":image!,"id":id]
-            return NSKeyedArchiver.archivedDataWithRootObject(dictionary as NSDictionary)
-        } else {
-            let dictionary:NSDictionary = ["message":message!,"from":from,"id":id]
-            return NSKeyedArchiver.archivedDataWithRootObject(dictionary as NSDictionary)
-        }
-        
-    }
 }

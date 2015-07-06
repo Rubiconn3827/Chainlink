@@ -14,7 +14,6 @@
 		216C55CF1B42D3010097339C /* ChainlinkUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216C55CE1B42D3010097339C /* ChainlinkUITests.swift */; };
 		216C55E11B42F8AB0097339C /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216C55E01B42F8AB0097339C /* SessionManager.swift */; };
 		216C55E31B4305780097339C /* MessageObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216C55E21B4305780097339C /* MessageObject.swift */; };
-		216C55E51B4307140097339C /* UserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216C55E41B4307140097339C /* UserInfo.swift */; };
 		21CF91CB1B45E86A0005ABFC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 216C55AF1B42D3010097339C /* Main.storyboard */; };
 /* End PBXBuildFile section */
 
@@ -52,7 +51,6 @@
 		216C55D01B42D3010097339C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		216C55E01B42F8AB0097339C /* SessionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SessionManager.swift; path = ../SessionManager.swift; sourceTree = "<group>"; };
 		216C55E21B4305780097339C /* MessageObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageObject.swift; sourceTree = "<group>"; };
-		216C55E41B4307140097339C /* UserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserInfo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,7 +110,6 @@
 				216C55B71B42D3010097339C /* LaunchScreen.storyboard */,
 				216C55BA1B42D3010097339C /* Info.plist */,
 				216C55B21B42D3010097339C /* Chainlink.xcdatamodeld */,
-				216C55E41B4307140097339C /* UserInfo.swift */,
 			);
 			path = Chainlink;
 			sourceTree = "<group>";
@@ -267,7 +264,6 @@
 				216C55B41B42D3010097339C /* Chainlink.xcdatamodeld in Sources */,
 				216C55E31B4305780097339C /* MessageObject.swift in Sources */,
 				216C55E11B42F8AB0097339C /* SessionManager.swift in Sources */,
-				216C55E51B4307140097339C /* UserInfo.swift in Sources */,
 				216C55AC1B42D3010097339C /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -411,7 +407,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Chainlink/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.apdev.Chainlink;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -423,7 +419,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Chainlink/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.apdev.Chainlink;
 				PRODUCT_NAME = "$(TARGET_NAME)";
